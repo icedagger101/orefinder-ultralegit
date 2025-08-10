@@ -1,24 +1,24 @@
 {
   "schemaVersion": 1,
-  "id": "addon-template",
+  "id": "big-caves-addon",
   "version": "${version}",
-  "name": "Addon Template",
-  "description": "An addon template for Meteor Client addons.",
+  "name": "Big Caves Addon",
+  "description": "Enhances cave exploration with powerful tools like BigCavesFinder and OreEsp.",
   "authors": [
-    "seasnail"
+    "koolname"
   ],
   "contact": {
-    "sources": "https://github.com/MeteorDevelopment/meteor-addon-template"
+    "sources": ""
   },
-  "icon": "assets/template/icon.png",
+  "icon": "assets/bigcaves/icon.png",
   "environment": "client",
   "entrypoints": {
     "meteor": [
-      "com.example.addon.AddonTemplate"
+      "com.koolname.bigcaves.BigCavesAddon"
     ]
   },
   "mixins": [
-    "addon-template.mixins.json"
+    "big-caves-addon.mixins.json"
   ],
   "custom": {
     "meteor-client:color": "225,25,25"

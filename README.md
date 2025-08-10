@@ -1,127 +1,96 @@
-# Meteor Addon Template
+# Big Caves Addon
 
-A template to allow easy usage of the Meteor Addon API.
+Enhance your cave exploration experience in Meteor Client with powerful tools designed to help you find and visualize valuable ores and large cave systems.
 
-### How to use
+---
 
-#### Use GitHub Template (Recommended)
+### 1. Big Caves Finder
 
-- Click the green `Use this template` button in the top right corner of this page.  
-  This will create a new repository with this template and a clean history.
+This module is engineered to discover massive cave systems with minimal impact on game performance. It uses a multi-threaded scanning process to analyze the world around the player for large, open subterranean spaces.
 
-#### Clone Manually
+#### Key Features:
+-   **Optimized Cave Detection:** Employs a highly-optimized, multi-threaded algorithm to scan for caves without causing significant lag or stutter.
+-   **Configurable Scanning Area:**
+    -   **Horizontal & Vertical Radius:** Customize the distance the module scans around the player, both horizontally and vertically.
+    -   **Max Scan Height:** Set a Y-level limit to prevent scanning in unwanted areas (e.g., above ground).
+-   **Intelligent Scanning:**
+    -   **Chunk-Based Analysis:** Divides the scan area into manageable volumes and only scans chunks that are fully loaded, preventing incomplete data.
+    -   **Air Block Thresholds:** Define the minimum number of air blocks required within a volume (`min-air-blocks`) and the minimum number of *connected* air blocks (`min-connected-air`) to qualify as a "big cave." This ensures it only finds genuinely large systems.
+    -   **Performance Caching:** Remembers recently scanned areas to avoid redundant checks, improving efficiency.
+    -   **Quick Air Estimation:** Uses a sampling method to quickly discard solid areas before performing a full block count.
+-   **Safety Limits:** Implements a node limit for its connectivity search (flood-fill) to prevent excessive processing, with different limits for single-player and multiplayer to ensure stability.
+-   **Customizable Rendering:**
+    -   **ESP Box:** Highlights found cave systems with a configurable colored box.
+    -   **Render Modes:** Choose between rendering the outline, the fill, or both (`ShapeMode`).
+    -   **Color Settings:** Pick any color and transparency for the ESP.
 
-- Alternatively, clone this repository using these commands for a clean history:
-  ```bash
-  git clone --depth 1 https://github.com/MeteorDevelopment/meteor-addon-template your-addon-name
-  cd your-addon-name
-  rm -rf .git
-  git init
-  git add .
-  git commit -m "Initial commit from template"
-  ```
+#### How It Works:
+The module scans in cubic volumes around the player. It first estimates if a volume contains a significant amount of air. If it does, it performs a more detailed count. If the air block count surpasses the `min-air-blocks` threshold, it then initiates a bounded flood-fill from the center of that volume to count how many of those air blocks are connected. If this connected count exceeds the `min-connected-size` threshold, the area is marked as a "big cave" and highlighted.
 
-#### Development
+---
 
-- Use this template to add custom modules, commands, HUDs, and other features to Meteor Client.
-- To test, run the `Minecraft Client` configuration in your IDE.
-  This will start a Minecraft client with the Meteor Client mod and your addon loaded.
-- To build, run the gradle `build` task. This will create a JAR file in the `build/libs` folder.
-    - Move the JAR file to the `mods` folder of your Minecraft installation, alongside the Meteor Client mod and run the
-      game.
+### 2. Ore ESP
 
-### Updating to newer Minecraft versions
+This module scans for and highlights specified ores that are exposed to air, making it easy to spot valuable resources in caves and ravines. It is designed to integrate seamlessly with the `BigCavesFinder` for maximum efficiency.
 
-To update this template to a newer Minecraft version, follow these steps:
+#### Key Features:
+-   **Multiple Scan Modes:**
+    -   **`Around Player`:** Scans in a configurable radius around the player's current position.
+    -   **`BigCaves`:** An efficient mode that only scans inside the large cave systems identified by the `BigCavesFinder` module.
+    -   **`Both`:** Combines both methods for the most comprehensive coverage.
+-   **Performance-First Design:**
+    -   **Multi-Threaded Scanning:** All scanning operations run on a separate thread to ensure smooth gameplay.
+    -   **Configurable Scan Delay:** Adjust the time between scans to balance performance and real-time updates.
+    -   **Automatic Cleanup:** Ores that are too far away (`despawn-distance`) or have been mined are automatically removed from the ESP.
+-   **Smart Ore Detection:**
+    -   **Exposed Ores Only:** The module specifically looks for ore blocks that are adjacent to an air block (`isExposed`), meaning you only see ores you can actually get to.
+    -   **Vein Finding:** When an exposed ore is found, the module quickly scans its immediate neighbors to find and highlight the entire exposed part of the vein.
+-   **Advanced Rendering & Visibility:**
+    -   **Dual-Color ESP:**
+        -   **Visible Color:** A distinct color for ores that are in your direct line of sight.
+        -   **Hidden Color:** A different color for ores that are exposed but currently obscured by other blocks.
+    -   **Visibility Cache:** Uses an efficient ray-tracing cache to determine if an ore is visible, reducing the computational load of line-of-sight checks.
+    -   **Customizable Shapes & Colors:** Full control over the render mode (`ShapeMode`) and colors for both visible and hidden ores.
+-   **User-Friendly Features:**
+    -   **Customizable Ore List:** Easily add or remove any block from the list of ores to search for.
+    -   **Chat Notifications:** Optional in-game chat messages to alert you when a new ore vein is discovered.
+    -   **On-Screen Info:** Displays the total count of currently highlighted ores.
 
-1. Ensure a Meteor Client snapshot is available for the new Minecraft version.
-2. Update `gradle.properties`:
-    - Set `minecraft_version`, `yarn_mappings` and `loader_version` to the new version.
-    - Update any additional dependencies accordingly.
-3. Update Loom:
-    - Change the `loom_version` in `build.gradle.kts` to the latest version compatible with the new Minecraft version.
-4. Update the Gradle wrapper:
-    - You can find the latest Gradle version [here](https://gradle.org/releases/).
-    - Run the `./gradlew wrapper --gradle-version <version>; ./gradlew wrapper` command to update the wrapper script.
-5. Update your source code:
-    - Adjust for Minecraft or Yarn mapping changes: method names, imports, mixins, etc.
-    - Check for Meteor Client API changes that may affect your addon by comparing against the
-      [master branch](https://github.com/MeteorDevelopment/meteor-client/tree/master).
-6. Build and test:
-    - Run the gradle `build` task.
-    - Confirm the build succeeds and your addon works with the new Minecraft version.
+## Screenshots
 
-### Project structure
+CaveFinder
+![cavefinder.png](screenshoots/cavefinder.png)
 
-```text
-.
-│── .github
-│   ╰── workflows
-│       │── dev_build.yml
-│       ╰── pull_request.yml
-│── gradle
-│   ╰── wrapper
-│       │── gradle-wrapper.jar
-│       ╰── gradle-wrapper.properties
-│── src
-│   ╰── main
-│       │── java
-│       │   ╰── com
-│       │       ╰── example
-│       │           ╰── addon
-│       │               │── commands
-│       │               │   ╰── CommandExample
-│       │               │── hud
-│       │               │   ╰── HudExample
-│       │               │── modules
-│       │               │   ╰── ModuleExample
-│       │               ╰── AddonTemplate
-│       ╰── resources
-│           │── assets
-│           │   ╰── template
-│           │       ╰── icon.png
-│           │── addon-template.mixins.json
-│           ╰── fabric.mod.json
-│── .editorconfig
-│── .gitignore
-│── build.gradle.kts
-│── gradle.properties
-│── gradlew
-│── gradlew.bat
-│── LICENSE
-│── README.md
-╰── settings.gradle.kts
-```
+OreEsp and CaveFinder
+![oreesp example.png](screenshoots/oreesp%20example.png)
 
-This is the default project structure. Each folder/file has a specific purpose.  
-Here is a brief explanation of the ones you might need to modify:
+OreEsp and CaveFinder
+![oreesp example2.png](screenshoots/oreesp%20example2.png)
+---
 
-- `.github/workflows`: Contains the GitHub Actions configuration files.
-- `gradle`: Contains the Gradle wrapper files.  
-  Edit the `gradle.properties` file to change the version of the Gradle wrapper.
-- `src/main/java/com/example/addon`: Contains the main class of the addon.  
-  Here you can register your custom commands, modules, and HUDs.  
-  Edit the `getPackage` method to reflect the package of your addon.
-- `src/main/resources`: Contains the resources of the addon.
-    - `assets`: Contains the assets of the addon.  
-      You can add your own assets here, separated in subfolders.
-        - `template`: Contains the assets of the template.  
-          You can replace the `icon.png` file with your own addon icon.  
-          Also, rename this folder to reflect the name of your addon.
-    - `addon-template.mixins.json`: Contains the Mixin configuration for the addon.  
-      You can add your own mixins in the `client` array.
-    - `fabric.mod.json`: Contains the metadata of the addon.  
-      Edit the various fields to reflect the metadata of your addon.
-- `build.gradle.kts`: Contains the Gradle build script.  
-  You can manage the dependencies of the addon here.  
-  Remember to keep the `fabric-loom` version up-to-date.
-- `gradle.properties.kts`: Contains the properties of the Gradle build.  
-  These will be used by the build script.
-- `LICENSE`: Contains the license of the addon.  
-  You can edit this file to change the license of your addon.
-- `README.md`: Contains the documentation of the addon.  
-  You can edit this file to reflect the documentation of your addon, and showcase its features.
 
-## License
+## Installation
 
-This template is available under the CC0 license. Feel free to use it for your own projects.
+1. Download the latest release of the Big Caves Addon `.jar` file.
+2. Place the `.jar` file into your Meteor Client `addons` folder.
+3. Launch Minecraft with Meteor Client installed.
+4. Enable the Big Caves modules from the Meteor Client modules list.
+
+---
+
+## Usage
+
+- Open the Meteor Client GUI.
+- Navigate to the **Cave Tools** category.
+- Enable **BigCavesFinder** or **OreEsp** modules as needed.
+- Configure module settings to suit your preferences.
+
+---
+
+## Requirements
+
+- Minecraft 1.21.6, 1.21.7, or compatible versions.
+- Java 21 or newer.
+- Meteor Client installed.
+
+Enjoy exploring those big caves!
